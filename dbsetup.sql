@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS test_results;
 DROP TABLE IF EXISTS tests;
 DROP TABLE IF EXISTS pull_requests;
+DROP TYPE IF EXISTS pr_status;
 DROP TABLE IF EXISTS commits;
 DROP TABLE IF EXISTS branches;
 DROP TABLE IF EXISTS projects;
