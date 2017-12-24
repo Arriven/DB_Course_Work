@@ -6,7 +6,7 @@ services:
 before_script:
         - psql -c 'create database course_db;' -U postgres
 
-gotest_args:
+goscript_args:
         -cover
 
 go:
