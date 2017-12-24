@@ -9,7 +9,7 @@ before_script:
 
 script:
         - go test -v -coverprofile=coverage.out ./...
-        - godacov -t $GO_CODACY_TOKEN -r ./coverage.out
+        - godacov -t $GO_CODACY_TOKEN -r ./coverage.out -c $TRAVIS_COMMIT
 
 go:
         - 1.9.x
