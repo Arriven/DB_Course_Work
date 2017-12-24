@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS
 branches(
     branch_id SERIAL PRIMARY KEY,
     branch_project SERIAL REFERENCES projects(project_id) NOT NULL,
-    branch_name VARCHAR(10) NOT NULL
+    branch_name VARCHAR(10) NOT NULL,
+    UNIQUE(branch_name, branch_project)
 );
 DELETE FROM branches;
 CREATE TABLE IF NOT EXISTS
