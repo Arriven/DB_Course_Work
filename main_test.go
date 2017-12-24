@@ -2,8 +2,6 @@ package main
 
 import (
 	"testing"
-	"os"
-	"os/exec"
 )
 
 func TestNormalFlow(t *testing.T) {
