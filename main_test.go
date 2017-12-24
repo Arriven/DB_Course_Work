@@ -7,8 +7,8 @@ import (
 )
 
 func TestMain(m *testing.M){
-	cmd := exec.Command("psql", "-f dbsetup.sql -U postgres")
-	cmd.Run()
+	exec.Command("psql", "-f dbsetup.sql -U postgres").Run()
+	exec.Command("sleep", "10").Run()
 	os.Exit(m.Run())
 }
 
