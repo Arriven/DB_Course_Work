@@ -16,9 +16,9 @@ projects(
 DELETE FROM projects;
 CREATE TABLE IF NOT EXISTS
 branches(
+    branch_id SERIAL PRIMARY KEY,
     branch_project SERIAL REFERENCES projects(project_id) NOT NULL,
-    branch_name VARCHAR(10) NOT NULL,
-    PRIMARY KEY (branch_project, branch_name)
+    branch_name VARCHAR(10) NOT NULL
 );
 DELETE FROM branches;
 CREATE TABLE IF NOT EXISTS
