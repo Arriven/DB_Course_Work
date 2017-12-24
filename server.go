@@ -24,3 +24,7 @@ func CreateServer(username string, password string, database string) (*Server, e
 	server := Server{db}
 	return &server, err
 }
+
+func (server *Server) Shutdown() {
+	server.database.Close()
+}

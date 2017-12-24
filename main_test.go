@@ -25,11 +25,13 @@ func TestMain(m *testing.M) {
 	file, err := ioutil.ReadFile("dbsetup.sql")
 	checkErrorAndExit(err)
 	db, err := OpenDb("postgres", "", "")
+	defer db.Close()
 	checkErrorAndExit(err)
 	_, err = db.Exec("CREATE DATABASE course_db")
 	checkErrorAndWarning(err)
 	db, err = OpenDb("postgres", "", "course_db")
 	checkErrorAndExit(err)
+	defer db.Close()
 	requests := strings.Split(string(file), ";")
 	for _, request := range requests {
 		_, err := db.Exec(request)
@@ -38,11 +40,12 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestNormalFlow(t *testing.T) {
+func TestUser(t *testing.T) {
 	server, err := CreateServer("postgres", "", "course_db")
 	if err != nil {
 		t.Error(err)
 	}
+	defer server.Shutdown()
 	
 	user, err := server.CreateUser("Arriven")
 	if err != nil {
@@ -50,5 +53,42 @@ func TestNormalFlow(t *testing.T) {
 	}
 	if user.nickname != "Arriven" {
 		t.Error("Warning: Name corrupted")
+	}
+	user, err = server.GetUserByNickname("Arriven")
+	if err != nil {
+		t.Error(err)
+	}
+	if user.nickname != "Arriven" {
+		t.Error("Warning: Name corrupted")
+	}
+	user, err = server.GetUserById(user.id)
+	if err != nil {
+		t.Error(err)
+	}
+	if user.nickname != "Arriven" {
+		t.Error("Warning: Name corrupted")
+	}
+}
+
+func TestProject(t *testing.T) {
+	server, err := CreateServer("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
+	}
+	defer server.Shutdown()
+	
+	user, err := server.CreateUser("SomeUser")
+	if err != nil {
+		t.Error(err)
+	}
+	project, err := server.CreateProject("testProject", user.id)
+	if err != nil {
+		t.Error(err)
+	}
+	if project.name != "testProject" {
+		t.Error("Warning: Name corrupted")
+	}
+	if project.owner.id != user.id {
+		t.Error("Warning: Owner corrupted")
 	}
 }
