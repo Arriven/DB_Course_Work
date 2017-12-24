@@ -4,9 +4,12 @@ services:
         - postgresql
 
 before_script:
+        - go get github.com/schrej/godacov
         - psql -c 'create database course_db;' -U postgres
 
-script: go test -v -cover ./...
+script:
+        - go test -v -coverprofile=coverage.out ./...
+        - godacov -t $GO_CODACY_TOKEN -r ./coverage.out
 
 go:
         - 1.9.x
