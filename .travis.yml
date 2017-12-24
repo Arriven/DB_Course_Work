@@ -6,6 +6,7 @@ services:
 before_script:
         - go get github.com/schrej/godacov
         - psql -c 'create database course_db;' -U postgres
+        - sleep 10
         - psql course_db -f dbsetup.sql -U postgres
         - sleep 10
 
