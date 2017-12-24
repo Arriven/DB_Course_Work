@@ -45,3 +45,7 @@ func PrintDb(username string, password string, database string) (error) {
 	defer db.Close()
 	return PrintTable(db)
 }
+
+func main(){
+	
+}
