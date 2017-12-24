@@ -39,20 +39,16 @@ func TestMain(m *testing.M) {
 }
 
 func TestNormalFlow(t *testing.T) {
-	db, err := OpenDb("postgres", "", "course_db")
+	server, err := CreateServer("postgres", "", "course_db")
 	if err != nil {
 		t.Error(err)
 	}
 	
-	_, err = CreateUser(db, "Arriven")
+	user, err := server.CreateUser("Arriven")
 	if err != nil {
 		t.Error(err)
 	}
-}
-
-func TestError(t *testing.T) {
-	err := PrintDb("postgres", "123", "wrong_name")
-	if(err == nil) {
-		t.Fail()
+	if user.nickname != "Arriven" {
+		t.Error("Warning: Name corrupted")
 	}
 }
