@@ -48,8 +48,9 @@ tests(
 DELETE FROM tests;
 CREATE TABLE IF NOT EXISTS
 test_results(
-    test SERIAL REFERENCES tests(test_id) PRIMARY KEY,
-    commit SERIAL REFERENCES commits(commit_id) PRIMARY KEY,
-    success_status BOOLEAN DEFAULT FALSE NOT NULL
+    test SERIAL REFERENCES tests(test_id) NOT NULL,
+    commit SERIAL REFERENCES commits(commit_id) NOT NULL,
+    success_status BOOLEAN DEFAULT FALSE NOT NULL,
+    PRIMARY KEY(test, commit)
 );
 DELETE FROM test_results;
