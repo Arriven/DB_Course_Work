@@ -18,31 +18,7 @@ type record struct {
 	phone string
 }
 
-func clearDB(db *sql.DB) {
-	fmt.Println("# Clearing Table")
-	_, err := db.Exec("DELETE FROM phonebook")
-	if(err != nil){
-		fmt.Println(err)
-		return
-	}
-}
-
-func initDB(db *sql.DB) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
-		"phonebook(\"id\" SERIAL PRIMARY KEY, " +
-		"\"name\" varchar(50), \"phone\" varchar(100))")
-	if(err != nil){
-		fmt.Println(err)
-		return
-	}
-	clearDB(db)
-	fmt.Println("# Inserting Values")
-	stmt, err := db.Prepare("INSERT INTO phonebook VALUES (default, $1, $2)")
-	_, err = stmt.Exec("Bohdan", "0935293993")
-	if(err != nil){
-		fmt.Println(err)
-		return
-	}
+func PrintTable(db *sql.DB) {
 	rows, err := db.Query("SELECT * FROM phonebook")
 	if (err != nil){
 		fmt.Println(err)
@@ -68,5 +44,5 @@ func main() {
 		return;
 	}
 	defer db.Close()
-	initDB(db)
+	PrintTable(db)
 }
