@@ -1,26 +1,55 @@
-CREATE TABLE IF NOT EXISTS phonebook("id" SERIAL PRIMARY KEY, "name" varchar(50), "phone" varchar(100));
+CREATE TABLE IF NOT EXISTS phonebook("id" SERIAL PRIMARY KEY, "name" VARCHAR(50), "phone" VARCHAR(100));
 DELETE FROM phonebook;
 INSERT INTO phonebook VALUES (default, 'SomeName', '0123456789');
 CREATE TABLE IF NOT EXISTS 
 users(
     user_id SERIAL PRIMARY KEY,
-    nickname varchar(20)
+    nickname VARCHAR(20) NOT NULL
 );
 DELETE FROM users;
 CREATE TABLE IF NOT EXISTS
 projects(
     project_id SERIAL PRIMARY KEY,
-    project_name varchar(50),
-    owner SERIAL REFERENCES users(user_id)
+    project_name VARCHAR(50) NOT NULL,
+    project_owner SERIAL REFERENCES users(user_id) NOT NULL
 );
 DELETE FROM projects;
-CREATE TYPE pull_request_status AS ENUM('pending', 'rejected', 'approved');
+CREATE TABLE IF NOT EXISTS
+branches(
+    branch_id SERIAL PRIMARY KEY,
+    branch_project SERIAL REFERENCES projects(project_id) NOT NULL,
+    branch_name VARCHAR(10) UNIQUE NOT NULL
+);
+DELETE FROM branches;
+CREATE TABLE IF NOT EXISTS
+commits(
+    commit_id SERIAL PRIMARY KEY,
+    commit_branch SERIAL REFERENCES branches(branch_id) NOT NULL,
+    commit_author SERIAL REFERENCES users(user_id) NOT NULL,
+    commit_message VARCHAR (500)
+);
+DELETE FROM commits;
+CREATE TYPE pr_status AS ENUM('pending', 'rejected', 'approved');
 CREATE TABLE IF NOT EXISTS
 pull_requests(
-    id SERIAL PRIMARY KEY,
-    project_id SERIAL REFERENCES projects(project_id),
-    user_id SERIAL REFERENCES users(user_id),
-    message varchar(500),
-    status pull_request_status default 'pending'
+    pull_request_id SERIAL PRIMARY KEY,
+    pull_request_project SERIAL REFERENCES projects(project_id) NOT NULL,
+    pull_request_commit SERIAL REFERENCES commits(commit_id) NOT NULL,
+    pull_request_message VARCHAR(500),
+    pull_request_status pr_status DEFAULT 'pending' NOT NULL
 );
 DELETE FROM pull_requests;
+CREATE TABLE IF NOT EXISTS
+tests(
+    test_id SERIAL PRIMARY KEY,
+    test_project SERIAL REFERENCES projects(project_id) NOT NULL,
+    test_description VARCHAR(200)
+);
+DELETE FROM tests;
+CREATE TABLE IF NOT EXISTS
+test_results(
+    test SERIAL REFERENCES tests(test_id) PRIMARY KEY,
+    commit SERIAL REFERENCES commits(commit_id) PRIMARY KEY,
+    success_status BOOLEAN DEFAULT FALSE NOT NULL
+);
+DELETE FROM test_results;
