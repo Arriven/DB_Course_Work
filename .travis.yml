@@ -5,6 +5,8 @@ services:
 
 before_script:
         - go get github.com/schrej/godacov
+        - psql -f dbsetup.sql -U postgres
+        - sleep 10
 
 script:
         - go test -v -coverprofile=coverage.out ./...
