@@ -1,10 +1,9 @@
-package test
+package main
 
 import (
 	"testing"
-	"fmt"
 )
 
-func TestMock(t *testing.T) {
-	fmt.Println("Test")
+func TestMain(t *testing.T) {
+	main()
 }
