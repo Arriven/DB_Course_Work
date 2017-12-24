@@ -18,31 +18,30 @@ type record struct {
 	phone string
 }
 
-func PrintTable(db *sql.DB) {
+func PrintTable(db *sql.DB) (error) {
 	rows, err := db.Query("SELECT * FROM phonebook")
 	if (err != nil){
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var rec record
 		err = rows.Scan(&rec.id, &rec.name, &rec.phone)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 		fmt.Println(rec)
 	}
+	return nil
 }
 
-func main() {
+func PrintDb(username string, password string, database string) (error) {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-		DB_USER, DB_PASSWORD, DB_NAME)
+		username, password, database)
 	db, err := sql.Open("postgres", dbinfo)
 	if(err != nil){
-		return;
+		return err;
 	}
 	defer db.Close()
-	PrintTable(db)
+	return PrintTable(db)
 }
