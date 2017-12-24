@@ -10,17 +10,13 @@ type Project struct {
 	owner User
 }
 
-func (server *Server)CreateProject(name string, owner_id int64) (*Project, error) {
+func (server *Server)CreateProject(name string, owner User) (*Project, error) {
 	var project Project
-	err := server.database.QueryRow("INSERT INTO projects VALUES(default, $1, $2) RETURNING project_id", name, owner_id).Scan(&project.id)
+	err := server.database.QueryRow("INSERT INTO projects VALUES(default, $1, $2) RETURNING project_id", name, owner.id).Scan(&project.id)
 	if err != nil {
 		return nil, err
 	}
-	owner, err := server.GetUserById(owner_id)
-	if err != nil {
-		return nil, err
-	}
-	project.owner = *owner
+	project.owner = owner
 	project.name = name
 	return &project, err
 }
@@ -45,4 +41,27 @@ func (server *Server)GetProjectById(id int64) (*Project, error) {
 		return &project, err
 	}
 	return nil, errors.New("No project found")
+}
+
+func (server *Server)GetUserProjects(user User) ([]Project, error) {
+	rows, err := server.database.Query("SELECT * FROM projects WHERE project_owner=$1", user.id)
+	if err != nil {
+		return nil, err
+	}
+	var result []Project
+
+	for rows.Next() {
+		var owner_id int64
+		var project Project
+		err = rows.Scan(&project.id, &project.name, &owner_id)
+		if err != nil {
+			return nil, err
+		}
+		if user.id != owner_id {
+			return nil, errors.New("Wrong owner")
+		}
+		project.owner = user
+		result = append(result, project)
+	}
+	return result, nil
 }

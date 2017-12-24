@@ -81,7 +81,7 @@ func TestProject(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	project, err := server.CreateProject("testProject", user.id)
+	project, err := server.CreateProject("testProject", *user)
 	if err != nil {
 		t.Error(err)
 	}
@@ -90,5 +90,12 @@ func TestProject(t *testing.T) {
 	}
 	if project.owner.id != user.id {
 		t.Error("Warning: Owner corrupted")
+	}
+	projects, err := server.GetUserProjects(*user)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(projects) != 1 {
+		t.Error("Wrong number of projects")
 	}
 }
