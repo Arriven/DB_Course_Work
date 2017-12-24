@@ -1,3 +1,5 @@
+package test
+
 import (
 	"testing"
 	"fmt"
