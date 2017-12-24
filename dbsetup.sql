@@ -4,7 +4,7 @@ INSERT INTO phonebook VALUES (default, 'SomeName', '0123456789');
 CREATE TABLE IF NOT EXISTS 
 users(
     user_id SERIAL PRIMARY KEY,
-    nickname VARCHAR(20) NOT NULL UNIQUE
+    user_nickname VARCHAR(20) NOT NULL UNIQUE
 );
 DELETE FROM users;
 CREATE TABLE IF NOT EXISTS

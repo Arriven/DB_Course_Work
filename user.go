@@ -6,13 +6,13 @@ import (
 )
 
 type user struct {
-	id int
+	id int64
 	nickname string
 }
 
 func CreateUser(db *sql.DB, nickname string) (*user, error) {
 	var newUser user
-	err := db.QueryRow("INSERT INTO users VALUES(default, $1)", nickname).Scan(&newUser.id, &newUser.nickname)
+	err := db.QueryRow("INSERT INTO users VALUES(default, $1) RETURNING user_id, user_nickname", nickname).Scan(&newUser.id, &newUser.nickname)
 	if err != nil {
 		return nil, err
 	}
