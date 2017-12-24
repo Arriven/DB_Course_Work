@@ -44,29 +44,36 @@ func TestUser(t *testing.T) {
 	server, err := CreateServer("postgres", "", "course_db")
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	defer server.Shutdown()
 	
 	user, err := server.CreateUser("Arriven")
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if user.nickname != "Arriven" {
 		t.Error("Warning: Name corrupted")
+		return
 	}
 	user, err = server.GetUserByNickname("Arriven")
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if user.nickname != "Arriven" {
 		t.Error("Warning: Name corrupted")
+		return
 	}
 	user, err = server.GetUserById(user.id)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if user.nickname != "Arriven" {
 		t.Error("Warning: Name corrupted")
+		return
 	}
 }
 
@@ -74,28 +81,64 @@ func TestProject(t *testing.T) {
 	server, err := CreateServer("postgres", "", "course_db")
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	defer server.Shutdown()
 	
 	user, err := server.CreateUser("SomeUser")
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	project, err := user.CreateProject("testProject")
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if project.name != "testProject" {
 		t.Error("Warning: Name corrupted")
+		return
 	}
 	if project.owner.id != user.id {
 		t.Error("Warning: Owner corrupted")
+		return
 	}
 	projects, err := user.GetProjects()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if len(projects) != 1 {
 		t.Error("Wrong number of projects")
+		return
+	}
+}
+
+func TestBranches(t *testing.T) {
+	server, err := CreateServer("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer server.Shutdown()
+	
+	user, err := server.CreateUser("SomeUser")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	project, err := user.CreateProject("testProject")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	branches, err := project.GetBranches()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(branches) != 1 {
+		t.Error("Wrong number of branches")
+		return
 	}
 }

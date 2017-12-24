@@ -6,18 +6,19 @@ import (
 
 type Project struct {
 	id int64
-	name string
 	owner User
+	name string
 }
 
 func (owner User)CreateProject(name string) (*Project, error) {
 	var project Project
-	err := owner.server.database.QueryRow("INSERT INTO projects VALUES(default, $1, $2) RETURNING project_id", name, owner.id).Scan(&project.id)
+	err := owner.server.database.QueryRow("INSERT INTO projects VALUES(default, $1, $2) RETURNING project_id", owner.id, name).Scan(&project.id)
 	if err != nil {
 		return nil, err
 	}
 	project.owner = owner
 	project.name = name
+	project.CreateBranch("master")
 	return &project, err
 }
 
@@ -29,7 +30,7 @@ func (server *Server)GetProjectById(id int64) (*Project, error) {
 	}
 	for rows.Next() {
 		var owner_id int64
-		err = rows.Scan(&project.id, &project.name, &owner_id)
+		err = rows.Scan(&project.id, &owner_id, &project.name)
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +54,7 @@ func (user User)GetProjects() ([]Project, error) {
 	for rows.Next() {
 		var owner_id int64
 		var project Project
-		err = rows.Scan(&project.id, &project.name, &owner_id)
+		err = rows.Scan(&project.id, &owner_id, &project.name)
 		if err != nil {
 			return nil, err
 		}

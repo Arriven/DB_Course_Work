@@ -12,8 +12,8 @@ CREATE TABLE users(
 );
 CREATE TABLE projects(
     project_id SERIAL PRIMARY KEY,
-    project_name VARCHAR(50) NOT NULL,
-    project_owner SERIAL REFERENCES users(user_id) NOT NULL
+    project_owner SERIAL REFERENCES users(user_id) NOT NULL,
+    project_name VARCHAR(50) NOT NULL
 );
 CREATE TABLE branches(
     branch_id SERIAL PRIMARY KEY,
