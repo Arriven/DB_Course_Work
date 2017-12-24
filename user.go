@@ -7,6 +7,7 @@ import (
 type User struct {
 	id int64
 	nickname string
+	server *Server
 }
 
 func (server *Server)CreateUser(nickname string) (*User, error) {
@@ -15,11 +16,13 @@ func (server *Server)CreateUser(nickname string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	user.server = server
 	return &user, err
 }
 
 func (server *Server)GetUserByNickname(nickname string) (*User, error) {
 	var user User
+	user.server = server
 	rows, err := server.database.Query("SELECT * FROM users WHERE user_nickname=$1", nickname)
 	if err != nil {
 		return nil, err
@@ -36,6 +39,7 @@ func (server *Server)GetUserByNickname(nickname string) (*User, error) {
 
 func (server *Server)GetUserById(id int64) (*User, error) {
 	var user User
+	user.server = server
 	rows, err := server.database.Query("SELECT * FROM users WHERE user_id=$1", id)
 	if err != nil {
 		return nil, err

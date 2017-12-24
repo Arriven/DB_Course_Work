@@ -10,9 +10,9 @@ type Project struct {
 	owner User
 }
 
-func (server *Server)CreateProject(name string, owner User) (*Project, error) {
+func (owner User)CreateProject(name string) (*Project, error) {
 	var project Project
-	err := server.database.QueryRow("INSERT INTO projects VALUES(default, $1, $2) RETURNING project_id", name, owner.id).Scan(&project.id)
+	err := owner.server.database.QueryRow("INSERT INTO projects VALUES(default, $1, $2) RETURNING project_id", name, owner.id).Scan(&project.id)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +43,8 @@ func (server *Server)GetProjectById(id int64) (*Project, error) {
 	return nil, errors.New("No project found")
 }
 
-func (server *Server)GetUserProjects(user User) ([]Project, error) {
-	rows, err := server.database.Query("SELECT * FROM projects WHERE project_owner=$1", user.id)
+func (user User)GetProjects() ([]Project, error) {
+	rows, err := user.server.database.Query("SELECT * FROM projects WHERE project_owner=$1", user.id)
 	if err != nil {
 		return nil, err
 	}

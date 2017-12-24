@@ -81,7 +81,7 @@ func TestProject(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	project, err := server.CreateProject("testProject", *user)
+	project, err := user.CreateProject("testProject")
 	if err != nil {
 		t.Error(err)
 	}
@@ -91,7 +91,7 @@ func TestProject(t *testing.T) {
 	if project.owner.id != user.id {
 		t.Error("Warning: Owner corrupted")
 	}
-	projects, err := server.GetUserProjects(*user)
+	projects, err := user.GetProjects()
 	if err != nil {
 		t.Error(err)
 	}
