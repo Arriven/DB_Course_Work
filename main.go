@@ -35,10 +35,14 @@ func PrintTable(db *sql.DB) (error) {
 	return nil
 }
 
-func PrintDb(username string, password string, database string) (error) {
+func OpenDb(username string, password string, database string) (*sql.DB, error){
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		username, password, database)
-	db, err := sql.Open("postgres", dbinfo)
+	return sql.Open("postgres", dbinfo)
+}
+
+func PrintDb(username string, password string, database string) (error) {
+	db, err := OpenDb(username, password, database)
 	if(err != nil){
 		return err;
 	}
@@ -47,5 +51,5 @@ func PrintDb(username string, password string, database string) (error) {
 }
 
 func main(){
-	
+
 }
