@@ -39,8 +39,13 @@ func TestMain(m *testing.M) {
 }
 
 func TestNormalFlow(t *testing.T) {
-	err := PrintDb("postgres", "", "course_db")
-	if(err != nil) {
+	db, err := OpenDb("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
+	}
+	
+	_, err = CreateUser(db, "Arriven")
+	if err != nil {
 		t.Error(err)
 	}
 }
