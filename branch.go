@@ -65,3 +65,25 @@ func (project Project) GetBranches() ([]Branch, error) {
 	}
 	return result, nil
 }
+
+func (project Project) GetBranchByName(name string) (*Branch, error) {
+	var branch Branch
+	rows, err := project.owner.server.database.Query("SELECT * FROM branches WHERE branch_project=$1 AND branch_name=$2", project.id, name)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var project_id int64
+		err = rows.Scan(&branch.id, &project_id, &branch.name)
+		if err != nil {
+			return nil, err
+		}
+		if project.id != project_id {
+			return nil, errors.New("Wrong project")
+		}
+		branch.project = project
+		return &branch, nil
+	}
+	return nil, errors.New("No Branches Found")
+}

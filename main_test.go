@@ -122,7 +122,7 @@ func TestBranches(t *testing.T) {
 	}
 	defer server.Shutdown()
 	
-	user, err := server.CreateUser("SomeUser")
+	user, err := server.CreateUser("SomeUser2")
 	if err != nil {
 		t.Error(err)
 		return
@@ -139,6 +139,15 @@ func TestBranches(t *testing.T) {
 	}
 	if len(branches) != 1 {
 		t.Error("Wrong number of branches")
+		return
+	}
+	branch, err := project.GetBranchByName("master")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if branch == nil {
+		t.Error("master branch wasn't created")
 		return
 	}
 }

@@ -38,6 +38,7 @@ CREATE TABLE pull_requests(
 CREATE TABLE tests(
     test_id SERIAL PRIMARY KEY,
     test_project SERIAL REFERENCES projects(project_id) NOT NULL,
+    test_script_path VARCHAR(300) NOT NULL,
     test_description VARCHAR(200)
 );
 CREATE TABLE test_results(
