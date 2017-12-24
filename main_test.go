@@ -8,32 +8,32 @@ import (
 	"strings"
 )
 
+func checkErrorAndExit(err error) {
+	if(err != nil) {
+		fmt.Println("Error: ", err)
+		os.Exit(1)
+	}
+}
+
+func checkErrorAndWarning(err error) {
+	if err != nil {
+		fmt.Println("Warning: ", err)
+	}
+}
+
 func TestMain(m *testing.M) {
 	file, err := ioutil.ReadFile("dbsetup.sql")
-	if(err != nil) {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkErrorAndExit(err)
 	db, err := OpenDb("postgres", "", "")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkErrorAndExit(err)
 	_, err = db.Exec("CREATE DATABASE course_db")
-	if err != nil {
-		fmt.Println(err)
-	}
+	checkErrorAndWarning(err)
 	db, err = OpenDb("postgres", "", "course_db")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	checkErrorAndExit(err)
 	requests := strings.Split(string(file), ";")
 	for _, request := range requests {
 		_, err := db.Exec(request)
-		if(err != nil) {
-			fmt.Println(err)
-		}
+		checkErrorAndWarning(err)
 	}
 	os.Exit(m.Run())
 }
