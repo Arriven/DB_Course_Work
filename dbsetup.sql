@@ -31,7 +31,6 @@ CREATE TABLE commits(
 CREATE TYPE pr_status AS ENUM('pending', 'rejected', 'approved');
 CREATE TABLE pull_requests(
     pull_request_id SERIAL PRIMARY KEY,
-    pull_request_project SERIAL REFERENCES projects(project_id) NOT NULL,
     pull_request_commit SERIAL REFERENCES commits(commit_id) NOT NULL,
     pull_request_message VARCHAR(500),
     pull_request_status pr_status DEFAULT 'pending' NOT NULL

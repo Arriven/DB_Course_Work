@@ -3,11 +3,11 @@ language: go
 services:
         - postgresql
 
-before_script:
-        - go get github.com/schrej/godacov
-
 script:
         - go test -v -coverprofile=coverage.out ./...
+
+after_succes:
+        - go get github.com/schrej/godacov
         - godacov -t $GO_CODACY_TOKEN -r ./coverage.out -c $TRAVIS_COMMIT
 
 go:
