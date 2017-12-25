@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"os/exec"
 )
 
 type Test struct {
@@ -69,4 +70,45 @@ func (project Project) GetTests() ([]Test, error) {
 		result = append(result, test)
 	}
 	return result, nil
+}
+
+func (commit Commit) RunTest (test Test) (bool, error) {
+	test_err := exec.Command(test.script).Run()
+	test_success := test_err == nil
+	err := test.project.owner.server.database.QueryRow("INSERT INTO test_results(test, commit, success_status, errors)" +
+	" VALUES($1, $2, $3, $4) RETURNING success_status", test.id, commit.id, test_success, test_err).Scan(&test_success)
+	if err != nil {
+		return false, err
+	}
+	return test_success, test_err
+}
+
+func (commit Commit) RunAllTests () (bool, error) {
+	tests, err := commit.branch.project.GetTests()
+	if err != nil {
+		return false, err
+	}
+	var success bool = true
+	for _, test := range tests {
+		test_success, _ := commit.RunTest(test)
+		success = success && test_success
+	}
+	return success, nil
+}
+
+func (commit Commit) IsAllTestsPassed () (bool, error) {
+	rows, err := commit.branch.project.owner.server.database.Query("SELECT success_status" +
+		" FROM test_results WHERE commit=$1", commit.id)
+	if err != nil {
+		return false, err
+	}
+
+	for rows.Next() {
+		var success bool
+		err = rows.Scan(&success)
+		if err != nil || !success {
+			return false, err
+		}
+	}
+	return true, nil
 }

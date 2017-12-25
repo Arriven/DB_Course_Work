@@ -175,10 +175,6 @@ func TestCommits(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if branch == nil {
-		t.Error("master branch wasn't created")
-		return
-	}
 	_, err = user.MakeCommit(*branch, "Test commit")
 	if err != nil {
 		t.Error(err)
@@ -204,7 +200,7 @@ func TestTests(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	_, err = project.AddTest("/bin/true", "always pass")
+	test, err := project.AddTest("/bin/true", "always pass")
 	if err != nil {
 		t.Error(err)
 		return
@@ -216,6 +212,34 @@ func TestTests(t *testing.T) {
 	}
 	if len(tests) != 1 {
 		t.Error("Wrong number of tests")
+		return
+	}
+	branch, err := project.GetBranchByName("master")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	commit, err := user.MakeCommit(*branch, "Test commit")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	success, err := commit.RunTest(*test)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !success {
+		t.Error("Test failed")
+		return
+	}
+	all_tests_success, err := commit.IsAllTestsPassed()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !all_tests_success {
+		t.Error("Some of the tests failed")
 		return
 	}
 }

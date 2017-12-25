@@ -46,5 +46,6 @@ CREATE TABLE test_results(
     test SERIAL REFERENCES tests(test_id) NOT NULL,
     commit SERIAL REFERENCES commits(commit_id) NOT NULL,
     success_status BOOLEAN DEFAULT FALSE NOT NULL,
+    errors VARCHAR(500),
     PRIMARY KEY(test, commit)
 );
