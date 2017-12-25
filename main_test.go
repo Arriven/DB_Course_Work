@@ -185,3 +185,37 @@ func TestCommits(t *testing.T) {
 		return
 	}
 }
+
+func TestTests(t *testing.T) {
+	server, err := CreateServer("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer server.Shutdown()
+	
+	user, err := server.CreateUser("SomeUser4")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	project, err := user.CreateProject("testProject")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	_, err = project.AddTest("/bin/true", "always pass")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	tests, err := project.GetTests()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(tests) != 1 {
+		t.Error("Wrong number of tests")
+		return
+	}
+}
