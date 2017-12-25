@@ -75,8 +75,9 @@ func (project Project) GetTests() ([]Test, error) {
 func (commit Commit) RunTest (test Test) (bool, error) {
 	test_err := exec.Command(test.script).Run()
 	test_success := test_err == nil
-	err := test.project.owner.server.database.QueryRow("INSERT INTO test_results(test, commit, success_status, errors)" +
-	" VALUES($1, $2, $3, $4) RETURNING success_status", test.id, commit.id, test_success, test_err).Scan(&test_success)
+	_, err := test.project.owner.server.database.Exec("INSERT INTO test_results(test, commit, success_status, errors)" +
+	" VALUES($1, $2, $3, $4)" +
+	" ON CONFLICT (test, commit) DO UPDATE SET success_status = Excluded.success_status, errors = Excluded.errors", test.id, commit.id, test_success, test_err)
 	if err != nil {
 		return false, err
 	}

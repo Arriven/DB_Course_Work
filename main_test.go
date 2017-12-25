@@ -224,6 +224,11 @@ func TestTests(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	_, err = commit.RunTest(*test)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	success, err := commit.RunTest(*test)
 	if err != nil {
 		t.Error(err)
