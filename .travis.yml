@@ -11,8 +11,6 @@ before_script:
 
 script:
         - go test -v -coverprofile=coverage.out ./...
-
-after_succes:
         - godacov -t $GO_CODACY_TOKEN -r ./coverage.out -c $TRAVIS_COMMIT
 
 go:
