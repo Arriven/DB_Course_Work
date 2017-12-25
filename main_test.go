@@ -98,13 +98,12 @@ func TestServer(t *testing.T) {
 	server, err := CreateServer("postgres", "", "course_db")
 	if err != nil {
 		t.Error(err)
-		return
+	} else {
+		defer server.Shutdown()
 	}
-	defer server.Shutdown()
 	_, err = CreateServer("postgres", "wrong password", "wrong_db")
 	if err == nil {
 		t.Error("Created server with invalid credentials")
-		return
 	}
 }
 
@@ -115,17 +114,6 @@ func TestUser(t *testing.T) {
 		return
 	}
 	defer server.Shutdown()
-
-	_, err = server.GetUserByNickname("Arriven")
-	if err == nil {
-		t.Error("Found user when there's should be no user")
-		return
-	}
-	_, err = server.GetUserById(582341024)
-	if err == nil {
-		t.Error("Found user when there's should be no user")
-		return
-	}
 	
 	user, err := server.CreateUser("Arriven")
 	if err != nil {
@@ -139,24 +127,26 @@ func TestUser(t *testing.T) {
 	user, err = server.GetUserByNickname("Arriven")
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if user.nickname != "Arriven" {
+	} else if user.nickname != "Arriven" {
 		t.Error("Warning: Name corrupted")
-		return
 	}
 	user, err = server.GetUserById(user.id)
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if user.nickname != "Arriven" {
+	} else if user.nickname != "Arriven" {
 		t.Error("Warning: Name corrupted")
-		return
 	}
 	_, err = server.CreateUser("Arriven")
 	if err == nil {
 		t.Error("Created user with same name")
+	}
+	_, err = server.GetUserByNickname("WrongUserName")
+	if err == nil {
+		t.Error("Found user when there's should be no user")
+	}
+	_, err = server.GetUserById(-1)
+	if err == nil {
+		t.Error("Found user when there's should be no user")
 	}
 }
 
@@ -180,25 +170,19 @@ func TestProject(t *testing.T) {
 	}
 	if project.name != "testProject" {
 		t.Error("Warning: Name corrupted")
-		return
 	}
 	if project.owner.id != user.id {
 		t.Error("Warning: Owner corrupted")
-		return
 	}
 	projects, err := user.GetProjects()
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if len(projects) != 1 {
+	} else if len(projects) != 1 {
 		t.Error("Wrong number of projects")
-		return
 	}
 	project, err = server.GetProjectById(project.id)
 	if err != nil {
 		t.Error(err)
-		return
 	}
 	_, err = server.GetProjectById(-1)
 	if err == nil {
@@ -227,20 +211,27 @@ func TestBranches(t *testing.T) {
 	branches, err := project.GetBranches()
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if len(branches) != 1 {
+	} else if len(branches) != 1 {
 		t.Error("Wrong number of branches")
-		return
 	}
 	branch, err := project.GetBranchByName("master")
 	if err != nil {
 		t.Error(err)
-		return
 	}
 	if branch == nil {
 		t.Error("master branch wasn't created")
-		return
+	}
+	_, err = server.GetBranchById(branch.id)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = project.GetBranchByName("unknown branch")
+	if err == nil {
+		t.Error("Found branch when shouldn't")
+	}
+	_, err = server.GetBranchById(-1)
+	if err == nil {
+		t.Error("Found branch when shouldn't")
 	}
 }
 
@@ -267,10 +258,18 @@ func TestCommits(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	_, err = user.MakeCommit(*branch, "Test commit")
+	commit, err := user.MakeCommit(*branch, "Test commit")
 	if err != nil {
 		t.Error(err)
 		return
+	}
+	_, err = server.GetCommitById(commit.id)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = server.GetCommitById(-1)
+	if err == nil {
+		t.Error("Found commit when shouldn't")
 	}
 }
 
@@ -300,11 +299,8 @@ func TestTests(t *testing.T) {
 	tests, err := project.GetTests()
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	if len(tests) != 1 {
+	} else if len(tests) != 1 {
 		t.Error("Wrong number of tests")
-		return
 	}
 	branch, err := project.GetBranchByName("master")
 	if err != nil {
@@ -316,27 +312,77 @@ func TestTests(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	_, err = commit.RunTest(*test)
-	if err != nil {
-		t.Error(err)
-		return
-	}
 	success, err := commit.RunTest(*test)
 	if err != nil {
 		t.Error(err)
-		return
 	}
 	if !success {
 		t.Error("Test failed")
-		return
 	}
 	all_tests_success, err := commit.IsAllTestsPassed()
 	if err != nil {
 		t.Error(err)
-		return
 	}
 	if !all_tests_success {
 		t.Error("Some of the tests failed")
+	}
+	_, err = server.GetTestById(test.id)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = server.GetTestById(-1)
+	if err == nil {
+		t.Error("Found test where shouldn't")
+	}
+}
+
+func TestPullRequest (t *testing.T) {
+	server, err := CreateServer("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
 		return
+	}
+	defer server.Shutdown()
+	
+	user, err := server.CreateUser("SomeUser5")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	project, err := user.CreateProject("testProject")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	_, err = project.AddTest("/bin/true", "always pass")
+	if err != nil {
+		t.Error(err)
+	}
+	branch, err := project.GetBranchByName("master")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	commit, err := user.MakeCommit(*branch, "Test commit")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	pr, err := server.CreatePullRequest(*commit, "test pull request")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	err = pr.Validate()
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = server.GetPullRequestById(pr.id)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = server.GetPullRequestById(-1)
+	if err == nil {
+		t.Error("Found pull request when shouldn't")
 	}
 }

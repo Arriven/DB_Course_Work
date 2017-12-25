@@ -51,7 +51,7 @@ func (server *Server) CreatePullRequest (commit Commit, message string) (*PullRe
 func (server *Server) GetPullRequestById(id int64) (*PullRequest, error) {
 	var pr PullRequest
 	rows, err := server.database.Query("SELECT pull_request_id, pull_request_commit, pull_request_message, pull_request_status" +
-		" FROM commits WHERE commit_id=$1", id)
+		" FROM pull_requests WHERE commit_id=$1", id)
 	if err != nil {
 		return nil, err
 	}
