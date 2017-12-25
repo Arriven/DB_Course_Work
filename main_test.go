@@ -151,3 +151,37 @@ func TestBranches(t *testing.T) {
 		return
 	}
 }
+
+func TestCommits(t *testing.T) {
+	server, err := CreateServer("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer server.Shutdown()
+	
+	user, err := server.CreateUser("SomeUser3")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	project, err := user.CreateProject("testProject")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	branch, err := project.GetBranchByName("master")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if branch == nil {
+		t.Error("master branch wasn't created")
+		return
+	}
+	_, err = user.MakeCommit(*branch, "Test commit")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}

@@ -13,7 +13,8 @@ CREATE TABLE users(
 CREATE TABLE projects(
     project_id SERIAL PRIMARY KEY,
     project_owner SERIAL REFERENCES users(user_id) NOT NULL,
-    project_name VARCHAR(50) NOT NULL
+    project_name VARCHAR(50) NOT NULL,
+    UNIQUE(project_owner, project_name)
 );
 CREATE TABLE branches(
     branch_id SERIAL PRIMARY KEY,
@@ -23,8 +24,8 @@ CREATE TABLE branches(
 );
 CREATE TABLE commits(
     commit_id SERIAL PRIMARY KEY,
-    commit_branch SERIAL REFERENCES branches(branch_id) NOT NULL,
     commit_author SERIAL REFERENCES users(user_id) NOT NULL,
+    commit_branch SERIAL REFERENCES branches(branch_id) NOT NULL,
     commit_message VARCHAR (500)
 );
 CREATE TYPE pr_status AS ENUM('pending', 'rejected', 'approved');

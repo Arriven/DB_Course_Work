@@ -10,9 +10,11 @@ type Project struct {
 	name string
 }
 
-func (owner User)CreateProject(name string) (*Project, error) {
+func (owner User) CreateProject (name string) (*Project, error) {
 	var project Project
-	err := owner.server.database.QueryRow("INSERT INTO projects VALUES(default, $1, $2) RETURNING project_id", owner.id, name).Scan(&project.id)
+	err := owner.server.database.QueryRow("INSERT INTO projects(project_id, project_owner, project_name)" +
+	" VALUES(default, $1, $2) RETURNING project_id",
+	owner.id, name).Scan(&project.id)
 	if err != nil {
 		return nil, err
 	}
@@ -22,9 +24,10 @@ func (owner User)CreateProject(name string) (*Project, error) {
 	return &project, err
 }
 
-func (server *Server)GetProjectById(id int64) (*Project, error) {
+func (server *Server) GetProjectById (id int64) (*Project, error) {
 	var project Project
-	rows, err := server.database.Query("SELECT * FROM projects WHERE project_id=$1", id)
+	rows, err := server.database.Query("SELECT project_id, project_owner, project_name" +
+		" FROM projects WHERE project_id=$1", id)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +47,9 @@ func (server *Server)GetProjectById(id int64) (*Project, error) {
 	return nil, errors.New("No project found")
 }
 
-func (user User)GetProjects() ([]Project, error) {
-	rows, err := user.server.database.Query("SELECT * FROM projects WHERE project_owner=$1", user.id)
+func (user User) GetProjects() ([]Project, error) {
+	rows, err := user.server.database.Query("SELECT project_id, project_owner, project_name" +
+		" FROM projects WHERE project_owner=$1", user.id)
 	if err != nil {
 		return nil, err
 	}

@@ -10,9 +10,10 @@ type Branch struct {
 	project Project
 }
 
-func (project Project)CreateBranch(name string) (*Branch, error) {
+func (project Project) CreateBranch (name string) (*Branch, error) {
 	var branch Branch
-	err := project.owner.server.database.QueryRow("INSERT INTO branches VALUES(default, $1, $2) RETURNING branch_id", project.id, name).Scan(&branch.id)
+	err := project.owner.server.database.QueryRow("INSERT INTO branches(branch_id, branch_project, branch_name)" +
+		" VALUES(default, $1, $2) RETURNING branch_id", project.id, name).Scan(&branch.id)
 	if err != nil {
 		return nil, err
 	}
@@ -21,9 +22,10 @@ func (project Project)CreateBranch(name string) (*Branch, error) {
 	return &branch, err
 }
 
-func (server *Server)GetBranchById(id int64) (*Branch, error) {
+func (server *Server) GetBranchById (id int64) (*Branch, error) {
 	var branch Branch
-	rows, err := server.database.Query("SELECT * FROM branches WHERE branch_id=$1", id)
+	rows, err := server.database.Query("SELECT branch_id, branch_project, branch_name" +
+		" FROM branches WHERE branch_id=$1", id)
 	if err != nil {
 		return nil, err
 	}
