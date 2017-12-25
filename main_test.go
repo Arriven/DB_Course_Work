@@ -115,6 +115,17 @@ func TestUser(t *testing.T) {
 		return
 	}
 	defer server.Shutdown()
+
+	_, err = server.GetUserByNickname("Arriven")
+	if err == nil {
+		t.Error("Found user when there's should be no user")
+		return
+	}
+	_, err = server.GetUserById(582341024)
+	if err == nil {
+		t.Error("Found user when there's should be no user")
+		return
+	}
 	
 	user, err := server.CreateUser("Arriven")
 	if err != nil {
@@ -183,6 +194,15 @@ func TestProject(t *testing.T) {
 	if len(projects) != 1 {
 		t.Error("Wrong number of projects")
 		return
+	}
+	project, err = server.GetProjectById(project.id)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	_, err = server.GetProjectById(-1)
+	if err == nil {
+		t.Error("Found project where shouldn't")
 	}
 }
 
