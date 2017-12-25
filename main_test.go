@@ -40,6 +40,62 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func TestNormalFlow(t *testing.T) {
+	server, err := CreateServer("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer server.Shutdown()
+	
+	user, err := server.CreateUser("TestUser")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	project, err := user.CreateProject("TestProject")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	test, err := project.AddTest("/bin/true", "always pass")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	branch, err := project.GetBranchByName("master")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	commit, err := user.MakeCommit(*branch, "Test commit")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	_, err = commit.RunTest(*test)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	pr, err := server.CreatePullRequest(*commit, "Test pull request")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println("pr created")
+	err = pr.Validate()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println("pr Validated")
+	if pr.status != approved {
+		t.Error("Wrong pr status")
+		return
+	}
+}
+
 func TestUser(t *testing.T) {
 	server, err := CreateServer("postgres", "", "course_db")
 	if err != nil {

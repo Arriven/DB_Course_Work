@@ -24,7 +24,9 @@ func (s *PullRequestStatus) Scan(value interface{}) error {
 }
 
 func (s PullRequestStatus) Value() (driver.Value, error) {
-	// validation would go here
+	if s != pending && s != rejected && s != approved {
+		return nil, errors.New("Invalid status")
+	}
 	return string(s), nil
 }
 type PullRequest struct {
@@ -46,7 +48,30 @@ func (server *Server) CreatePullRequest (commit Commit, message string) (*PullRe
 	return &pr, err
 }
 
-func (pr *PullRequest) ValidatePullRequest() error {
+func (server *Server) GetPullRequestById(id int64) (*PullRequest, error) {
+	var pr PullRequest
+	rows, err := server.database.Query("SELECT pull_request_id, pull_request_commit, pull_request_message, pull_request_status" +
+		" FROM commits WHERE commit_id=$1", id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var commit_id int64
+		err = rows.Scan(&pr.id, &commit_id, &pr.message, &pr.status)
+		if err != nil {
+			return nil, err
+		}
+		commit, err := server.GetCommitById(commit_id)
+		if err != nil {
+			return nil, err
+		}
+		pr.commit = *commit
+		return &pr, err
+	}
+	return nil, errors.New("No pull requests found")
+}
+
+func (pr *PullRequest) Validate() error {
 	success, err := pr.commit.RunAllTests()
 	if err != nil {
 		return err
@@ -56,7 +81,7 @@ func (pr *PullRequest) ValidatePullRequest() error {
 		status = approved
 	}
 	err = pr.commit.branch.project.owner.server.database.QueryRow("UPDATE pull_requests" +
-		"SET pull_request_status=$2 WHERE pull_request_id=$1 RETURNING pull_request_status", pr.id, status).Scan(&pr.status)
+		" SET pull_request_status = $1 WHERE pull_request_id = $2 RETURNING pull_request_status", status, pr.id).Scan(&pr.status)
 	if err != nil {
 		return err
 	}
