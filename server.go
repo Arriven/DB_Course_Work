@@ -21,6 +21,10 @@ func CreateServer(username string, password string, database string) (*Server, e
 	if err != nil {
 		return nil, err
 	}
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
 	server := Server{db}
 	return &server, err
 }

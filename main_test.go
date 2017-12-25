@@ -83,15 +83,27 @@ func TestNormalFlow(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	fmt.Println("pr created")
 	err = pr.Validate()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	fmt.Println("pr Validated")
 	if pr.status != approved {
 		t.Error("Wrong pr status")
+		return
+	}
+}
+
+func TestServer(t *testing.T) {
+	server, err := CreateServer("postgres", "", "course_db")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer server.Shutdown()
+	_, err = CreateServer("postgres", "wrong password", "wrong_db")
+	if err == nil {
+		t.Error("Created server with invalid credentials")
 		return
 	}
 }
@@ -130,6 +142,10 @@ func TestUser(t *testing.T) {
 	if user.nickname != "Arriven" {
 		t.Error("Warning: Name corrupted")
 		return
+	}
+	_, err = server.CreateUser("Arriven")
+	if err == nil {
+		t.Error("Created user with same name")
 	}
 }
 
